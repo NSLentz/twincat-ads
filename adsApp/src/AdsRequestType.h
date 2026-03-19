@@ -1,0 +1,31 @@
+#ifndef ADSREQUESTTYPE_H_
+#define ADSREQUESTTYPE_H_
+
+#include "AdsDef.h"
+
+enum class AdsBulkRequestType : uint32_t
+{
+    UNDEFINED = 0,
+    DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS,
+    READ_MULTIPLE_SYMBOL_VALUES,
+    WRITE_MULTIPLE_SYMBOL_VALUES,
+    ADD_MULTIPLE_SYMBOL_NOTIFICATIONS,
+    DEL_MULTIPLE_SYMBOL_NOTIFICATIONS
+};
+
+enum class AdsSubCommandRequestType : uint32_t
+{
+    UNDEFINED = 0,
+    GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME,
+    READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME,
+    READ_SYMBOL_VALUE,
+    WRITE_SYMBOL_VALUE,
+    ADD_SYMBOL_NOTIFICATION,
+    DEL_SYMBOL_NOTIFICATION
+};
+
+std::string adsBulkRequestTypeToString(AdsBulkRequestType req);
+
+std::string adsSubCommandRequestTypeToString(AdsSubCommandRequestType req);
+
+#endif // ADSREQUESTTYPE_H_

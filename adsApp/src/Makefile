@@ -7,6 +7,7 @@ include $(TOP)/configure/CONFIG
 
 USR_CXXFLAGS += -std=c++11 -DCONFIG_DEFAULT_LOGLEVEL=1
 USR_CPPFLAGS += -I ../../../ADS/AdsLib/
+USR_CPPFLAGS += -I ../../../doctest/doctest/
 USR_LDFLAGS  += -lpthread
 
 #=============================

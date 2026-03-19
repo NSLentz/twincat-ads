@@ -1,8 +1,8 @@
 #ifndef ADSBULKBUCKET_H_
 #define ADSBULKBUCKET_H_
 
+#include "AdsRequestType.h"
 #include "AdsBulkParameter.h"
-#include "IAdsBulkReaderWriter.h"
 #include <memory>
 
 bool operator==(const AmsNetId &lhs, const AmsNetId &rhs);
@@ -23,6 +23,8 @@ public:
     static constexpr size_t WRITE_BYTES_ALLOCATED_PER_SUB_COMMAND_OF_ADD_NOTIFICATION_REQUEST = sizeof(AdsAddNotificationInfo);
     static constexpr size_t WRITE_BYTES_ALLOCATED_PER_HANDLE = sizeof(uint32_t);
 
+    AdsBulkBucket(size_t maxNumParametersInBucket);
+
     const std::shared_ptr<AmsAddr> getAmsAddr() const;
     bool amsAddrIsSet() const;
     bool requestTypeIsSet() const;
@@ -38,7 +40,7 @@ public:
     bool parameterCanGoInThisBucket(const AdsBulkParameter &parameter, AdsSubCommandRequestType subCommandRequestType) const;
     AdsBulkParameter &getParameter(size_t i);
     AdsSubCommandRequestType getSubCommandRequestType(size_t i) const;
-    bool push(const AdsBulkParameter &parameter, AdsSubCommandRequestType subCommandRequestType);
+    bool push(AdsBulkParameter& parameter, AdsSubCommandRequestType subCommandRequestType);
     AdsBulkRequestType getBulkRequestType() const;
     void resizeRawBytesWriteForBulkWrite();
     static AdsBulkRequestType getBulkRequestTypeFromSubCommandRequestType(AdsSubCommandRequestType subCommandRequestType)
@@ -75,9 +77,10 @@ protected:
     std::vector<uint8_t> m_rawBytesRead;
     std::vector<uint8_t> m_rawBytesWrite;
     std::vector<uint32_t> m_rawBytesWriteSubCommandInfo;
-    size_t m_numRawBytesWriteValues = 0;
-    std::vector<AdsBulkParameter> m_parameters;
+    size_t m_numRawBytesWriteValues;
+    std::vector<AdsBulkParameter*> m_parameters;
     std::vector<AdsSubCommandRequestType> m_subCommandRequestTypes;
+    size_t m_maxNumParametersInBucket;
 };
 
 #endif // ADSBULKBUCKET_H_

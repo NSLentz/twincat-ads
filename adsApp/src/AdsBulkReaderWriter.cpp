@@ -6,7 +6,7 @@
 
 uint32_t AdsBulkReaderWriter::doSubCommandsInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
 {
-    auto adsResult = readWriteInBulk(amsClientPort, bucket);
+    auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_READWRITE);
     auto adsReadWriteReturnInfo = reinterpret_cast<AdsReadWriteReturnInfo *>(bucket.getRawBytesRead());
     auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
@@ -88,7 +88,7 @@ uint32_t AdsBulkReaderWriter::doSubCommandsInBulk(uint16_t amsClientPort, AdsBul
 
 uint32_t AdsBulkReaderWriter::readInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
 {
-    auto adsResult = readWriteInBulk(amsClientPort, bucket);
+    auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_READ);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
     auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
@@ -114,7 +114,7 @@ uint32_t AdsBulkReaderWriter::writeInBulk(uint16_t amsClientPort, AdsBulkBucket 
         auto &parameter = bucket.getParameter(i);
         memcpy(pointerToRawBytesWrite, parameter.value.data(), parameter.value.size());
     }
-    auto adsResult = readWriteInBulk(amsClientPort, bucket);
+    auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_WRITE);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
@@ -128,7 +128,7 @@ uint32_t AdsBulkReaderWriter::writeInBulk(uint16_t amsClientPort, AdsBulkBucket 
 
 uint32_t AdsBulkReaderWriter::addNotificationsInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
 {
-    auto adsResult = readWriteInBulk(amsClientPort, bucket);
+    auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_ADDDEVNOTE);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
     auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
@@ -146,7 +146,7 @@ uint32_t AdsBulkReaderWriter::addNotificationsInBulk(uint16_t amsClientPort, Ads
 
 uint32_t AdsBulkReaderWriter::delNotificationsInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
 {
-    auto adsResult = readWriteInBulk(amsClientPort, bucket);
+    auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_DELDEVNOTE);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
@@ -158,12 +158,12 @@ uint32_t AdsBulkReaderWriter::delNotificationsInBulk(uint16_t amsClientPort, Ads
     return adsResult;
 }
 
-uint32_t AdsBulkReaderWriter::readWriteInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
+uint32_t AdsBulkReaderWriter::readWriteInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket, uint32_t adsSumUpCommand)
 {
     uint32_t bytesRead = 0;
     auto adsResult = AdsSyncReadWriteReqEx2(
         amsClientPort, bucket.getAmsAddr().get(),
-        bucket.getBulkRequestType(), bucket.getNumSubCommands(),
+        adsSumUpCommand, bucket.getNumSubCommands(),
         bucket.getNumRawBytesRead(), bucket.getRawBytesRead(),
         bucket.getNumRawBytesWrite(), bucket.getRawBytesWrite(),
         &bytesRead);
@@ -195,7 +195,7 @@ uint32_t AdsBulkReaderWriter::readWriteInBulkRouter(uint16_t amsClientPort, AdsB
         adsResult = doSubCommandsInBulk(amsClientPort, bucket);
         break;
     default:
-        std::cerr << "Ads bulk request [" << bucket.getBulkRequestType() << "] is not supported by this ads reader/writer class." << std::endl;
+        std::cerr << "Ads bulk request [" << adsRequestTypeToStr(bucket.getBulkRequestType()) << "] is not supported by this ads reader/writer class." << std::endl;
         break;
     }
     return adsResult;
