@@ -66,7 +66,6 @@ uint8_t *AdsBulkBucket::getRawBytesWrite()
     return m_rawBytesWrite.data();
 }
 
-
 uint8_t *AdsBulkBucket::getRawBytesWriteValues()
 {
     return m_rawBytesWrite.data() + getSubCommandInfoSizeInBytes();

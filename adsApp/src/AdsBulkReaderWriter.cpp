@@ -1,5 +1,6 @@
 #include "AdsBulkReaderWriter.h"
 #include "AdsLib.h"
+#include "AdsRequestType.h"
 #include "adsSymbolTable.h"
 #include <cstring>
 #include <iostream>
@@ -195,7 +196,7 @@ uint32_t AdsBulkReaderWriter::readWriteInBulkRouter(uint16_t amsClientPort, AdsB
         adsResult = doSubCommandsInBulk(amsClientPort, bucket);
         break;
     default:
-        std::cerr << "Ads bulk request [" << adsRequestTypeToStr(bucket.getBulkRequestType()) << "] is not supported by this ads reader/writer class." << std::endl;
+        std::cerr << "Ads bulk request [" << adsBulkRequestTypeToString(bucket.getBulkRequestType()) << "] is not supported by this ads reader/writer class." << std::endl;
         break;
     }
     return adsResult;
