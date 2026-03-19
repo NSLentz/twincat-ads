@@ -223,14 +223,6 @@ TEST_SUITE("AdsBulkBucket")
             CHECK(value == values[2]);
         }
     }
-    TEST_CASE("uint32_t *getRawBytesSubCommandInfo()")
-    {
-        SUBCASE("Push some valid parameters with sub commands to do a bulk write.\n"
-                "Mock the return statuses for the writes and check getting the return codes produces the expected result.\n"
-                "Require all push attempts succeed. Check getting the return codes produces the expected result")
-        {
-        }
-    }
     TEST_CASE("static AdsBulkRequestType getBulkRequestTypeFromSubCommandRequestType(AdsSubCommandRequestType subCommandRequestType)")
     {
         SUBCASE("ADD_SYMBOL_NOTIFICATION maps to ADD_MULTIPLE_SYMBOL_NOTIFICATIONS")
@@ -240,7 +232,6 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::ADD_MULTIPLE_SYMBOL_NOTIFICATIONS);
         }
-
         SUBCASE("DEL_SYMBOL_NOTIFICATION maps to DEL_MULTIPLE_SYMBOL_NOTIFICATIONS")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
@@ -248,7 +239,6 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::DEL_MULTIPLE_SYMBOL_NOTIFICATIONS);
         }
-
         SUBCASE("GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME maps to DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
@@ -256,7 +246,6 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS);
         }
-
         SUBCASE("READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME maps to DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
@@ -264,7 +253,6 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS);
         }
-
         SUBCASE("READ_SYMBOL_VALUE maps to READ_MULTIPLE_SYMBOL_VALUES")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
@@ -272,7 +260,6 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::READ_MULTIPLE_SYMBOL_VALUES);
         }
-
         SUBCASE("WRITE_SYMBOL_VALUE maps to WRITE_MULTIPLE_SYMBOL_VALUES")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
@@ -280,59 +267,19 @@ TEST_SUITE("AdsBulkBucket")
 
             CHECK(result == AdsBulkRequestType::WRITE_MULTIPLE_SYMBOL_VALUES);
         }
+        SUBCASE("UNDEFINED subCommandRequestType returns UNDEFINED")
+        {
+            auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
+                AdsSubCommandRequestType::UNDEFINED);
 
+            CHECK(result == AdsBulkRequestType::UNDEFINED);
+        }
         SUBCASE("Invalid/unmapped subCommandRequestType returns UNDEFINED")
         {
             auto result = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
                 static_cast<AdsSubCommandRequestType>(9999));
 
             CHECK(result == AdsBulkRequestType::UNDEFINED);
-        }
-
-        SUBCASE("Verify all symbol notification sub-command types map correctly.\n"
-                "Test both ADD and DEL notification types produce their respective bulk request types")
-        {
-            auto addResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::ADD_SYMBOL_NOTIFICATION);
-            CHECK(addResult == AdsBulkRequestType::ADD_MULTIPLE_SYMBOL_NOTIFICATIONS);
-
-            auto delResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::DEL_SYMBOL_NOTIFICATION);
-            CHECK(delResult == AdsBulkRequestType::DEL_MULTIPLE_SYMBOL_NOTIFICATIONS);
-
-            // Ensure they map to different types
-            CHECK(addResult != delResult);
-        }
-
-        SUBCASE("Verify all symbol value operation sub-command types map correctly.\n"
-                "Test both READ and WRITE symbol value types produce their respective bulk request types")
-        {
-            auto readResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::READ_SYMBOL_VALUE);
-            CHECK(readResult == AdsBulkRequestType::READ_MULTIPLE_SYMBOL_VALUES);
-
-            auto writeResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
-            CHECK(writeResult == AdsBulkRequestType::WRITE_MULTIPLE_SYMBOL_VALUES);
-
-            // Ensure they map to different types
-            CHECK(readResult != writeResult);
-        }
-
-        SUBCASE("Verify multiple sub-command types that share the same bulk request type mapping.\n"
-                "Both GET_DYNAMIC_HANDLE and READ_INFO should map to DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS")
-        {
-            auto getDynamicHandleResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
-
-            auto readInfoResult = AdsBulkBucket::getBulkRequestTypeFromSubCommandRequestType(
-                AdsSubCommandRequestType::READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME);
-
-            CHECK(getDynamicHandleResult == AdsBulkRequestType::DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS);
-            CHECK(readInfoResult == AdsBulkRequestType::DO_ACTIONS_SPECIFIED_BY_SUB_COMMAND_GROUPS);
-
-            // Verify they map to the same type
-            CHECK(getDynamicHandleResult == readInfoResult);
         }
     }
 }
