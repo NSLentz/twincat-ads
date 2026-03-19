@@ -1,5 +1,6 @@
 #include "AdsBulkBucket.h"
 #include "doctest.h"
+#include <cstring>
 
 TEST_SUITE("AdsBulkBucket")
 {
@@ -70,7 +71,7 @@ TEST_SUITE("AdsBulkBucket")
               "size_t getSubCommandInfoSizeInBytes() const")
     {
         SUBCASE("Push multiple valid parameters with compatible requests.\n"
-                "Expect return value is true each time and expect get functions return correct values.")
+                "Expect return value is true each time and expect referenced get functions return correct values.")
         {
             AdsBulkBucket bucket(3);
             AdsBulkParameter parameter0;
@@ -143,6 +144,83 @@ TEST_SUITE("AdsBulkBucket")
             CHECK(bucket.getNumSubCommands() == 0);
             CHECK_THROWS(bucket.getParameter(2));
             CHECK_THROWS(bucket.getSubCommandRequestType(2));
+        }
+    }
+    TEST_CASE("uint8_t *getRawBytesRead()\n"
+              "uint32_t getNumRawBytesRead() const\n"
+              "uint32_t getNumRawBytesWrite() const\n"
+              "uint8_t* getRawBytesWriteValues() const\n"
+              "uint32_t getAdsReturnCodeForSubCommand(size_t subCommandIndex) const)\n"
+              "void resizeRawBytesWriteForBulkWrite()")
+    {
+        SUBCASE("Push some valid parameters with sub commands to do a bulk write.\n"
+                "Mock the return statuses for the writes and check getting the return codes produces the expected result.\n"
+                "Require all push attempts succeed. Check getting the return codes produces the expected result")
+        {
+            AdsBulkBucket bucket(3);
+
+            auto numRawBytesRead = bucket.getNumRawBytesRead();
+            CHECK(numRawBytesRead == 0);
+
+            AdsBulkParameter parameter0;
+            parameter0.value.resize(sizeof(uint32_t));
+            auto result = bucket.push(parameter0, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
+            REQUIRE(result);
+            AdsBulkParameter parameter1;
+            parameter1.value.resize(sizeof(uint32_t));
+            result = bucket.push(parameter1, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
+            REQUIRE(result);
+            AdsBulkParameter parameter2;
+            parameter2.value.resize(sizeof(uint32_t));
+            result = bucket.push(parameter2, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
+            REQUIRE(result);
+
+            auto numRawBytesWrite = bucket.getNumRawBytesWrite();
+            CHECK(numRawBytesWrite == 36);
+
+            auto pointerToRawBytesWrite = bucket.resizeRawBytesWriteForBulkWrite();
+            numRawBytesWrite = bucket.getNumRawBytesWrite();
+            CHECK(numRawBytesWrite == 48);
+
+            std::vector<uint32_t> values;
+            values.push_back(132);
+            values.push_back(476);
+            values.push_back(1);
+            for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
+            {
+                auto &parameter = bucket.getParameter(i);
+                memcpy(parameter.value.data(), &values[i], parameter.value.size());
+                memcpy(pointerToRawBytesWrite, parameter.value.data(), parameter.value.size());
+                pointerToRawBytesWrite += parameter.value.size();
+            }
+
+            numRawBytesRead = bucket.getNumRawBytesRead();
+            REQUIRE(numRawBytesRead == 12);
+
+            uint32_t returnCode0 = 0;
+            uint32_t returnCode1 = 176;
+            uint32_t returnCode2 = 132;
+
+            auto rawBytesRead = bucket.getRawBytesRead();
+            memcpy(&rawBytesRead[0], &returnCode0, sizeof(uint32_t));
+            memcpy(&rawBytesRead[4], &returnCode1, sizeof(uint32_t));
+            memcpy(&rawBytesRead[8], &returnCode2, sizeof(uint32_t));
+
+            auto resultCode = bucket.getAdsReturnCodeForSubCommand(0);
+            CHECK(resultCode == returnCode0);
+            resultCode = bucket.getAdsReturnCodeForSubCommand(1);
+            CHECK(resultCode == returnCode1);
+            resultCode = bucket.getAdsReturnCodeForSubCommand(2);
+            CHECK(resultCode == returnCode2);
+
+            auto rawBytesWriteValues = bucket.getRawBytesWriteValues();
+            uint32_t value;
+            memcpy(&value, &rawBytesWriteValues[0], sizeof(uint32_t));
+            CHECK(value == values[0]);
+            memcpy(&value, &rawBytesWriteValues[4], sizeof(uint32_t));
+            CHECK(value == values[1]);
+            memcpy(&value, &rawBytesWriteValues[8], sizeof(uint32_t));
+            CHECK(value == values[2]);
         }
     }
 }

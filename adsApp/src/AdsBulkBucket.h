@@ -31,6 +31,7 @@ public:
     uint8_t *getRawBytesRead();
     uint32_t getNumRawBytesRead() const;
     uint8_t *getRawBytesWrite();
+    uint8_t *getRawBytesWriteValues();
     uint32_t getNumRawBytesWrite() const;
     uint32_t *getRawBytesSubCommandInfo();
     size_t getSubCommandInfoSize() const;
@@ -42,7 +43,7 @@ public:
     AdsSubCommandRequestType getSubCommandRequestType(size_t i) const;
     bool push(AdsBulkParameter& parameter, AdsSubCommandRequestType subCommandRequestType);
     AdsBulkRequestType getBulkRequestType() const;
-    void resizeRawBytesWriteForBulkWrite();
+    uint8_t* resizeRawBytesWriteForBulkWrite();
     static AdsBulkRequestType getBulkRequestTypeFromSubCommandRequestType(AdsSubCommandRequestType subCommandRequestType)
     {
         switch (subCommandRequestType)

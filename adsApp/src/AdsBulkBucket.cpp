@@ -66,6 +66,12 @@ uint8_t *AdsBulkBucket::getRawBytesWrite()
     return m_rawBytesWrite.data();
 }
 
+
+uint8_t *AdsBulkBucket::getRawBytesWriteValues()
+{
+    return m_rawBytesWrite.data() + getSubCommandInfoSizeInBytes();
+}
+
 uint32_t AdsBulkBucket::getNumRawBytesWrite() const
 {
     return m_rawBytesWrite.size();
@@ -268,7 +274,8 @@ AdsBulkRequestType AdsBulkBucket::getBulkRequestType() const
     return m_bulkRequestType;
 }
 
-void AdsBulkBucket::resizeRawBytesWriteForBulkWrite()
+uint8_t* AdsBulkBucket::resizeRawBytesWriteForBulkWrite()
 {
     m_rawBytesWrite.resize(getSubCommandInfoSizeInBytes() + m_numRawBytesWriteValues);
+    return m_rawBytesWrite.data() + getSubCommandInfoSizeInBytes();
 }

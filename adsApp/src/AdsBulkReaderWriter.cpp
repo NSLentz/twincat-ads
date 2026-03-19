@@ -107,12 +107,12 @@ uint32_t AdsBulkReaderWriter::readInBulk(uint16_t amsClientPort, AdsBulkBucket &
 
 uint32_t AdsBulkReaderWriter::writeInBulk(uint16_t amsClientPort, AdsBulkBucket &bucket)
 {
-    bucket.resizeRawBytesWriteForBulkWrite();
-    auto pointerToRawBytesWrite = bucket.getRawBytesWrite() + bucket.getSubCommandInfoSizeInBytes();
+    auto pointerToRawBytesWrite = bucket.resizeRawBytesWriteForBulkWrite();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
         auto &parameter = bucket.getParameter(i);
         memcpy(pointerToRawBytesWrite, parameter.value.data(), parameter.value.size());
+        pointerToRawBytesWrite += parameter.value.size();
     }
     auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_WRITE);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
