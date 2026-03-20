@@ -9,7 +9,7 @@ uint32_t AdsBulkReaderWriter::doSubCommandsInBulk(uint16_t amsClientPort, AdsBul
 {
     auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_READWRITE);
     auto adsReadWriteReturnInfo = reinterpret_cast<AdsReadWriteReturnInfo *>(bucket.getRawBytesRead());
-    auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
+    auto adsReadData = bucket.getRawBytesRead() + bucket.getStatusReturnSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
         auto &parameter = bucket.getParameter(i);
@@ -91,7 +91,7 @@ uint32_t AdsBulkReaderWriter::readInBulk(uint16_t amsClientPort, AdsBulkBucket &
 {
     auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_READ);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
-    auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
+    auto adsReadData = bucket.getRawBytesRead() + bucket.getStatusReturnSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
         auto &parameter = bucket.getParameter(i);
@@ -131,7 +131,7 @@ uint32_t AdsBulkReaderWriter::addNotificationsInBulk(uint16_t amsClientPort, Ads
 {
     auto adsResult = readWriteInBulk(amsClientPort, bucket, ADSIGRP_SUMUP_ADDDEVNOTE);
     auto adsReturnCode = reinterpret_cast<uint32_t *>(bucket.getRawBytesRead());
-    auto adsReadData = bucket.getRawBytesRead() + bucket.getSubCommandInfoSizeInBytes();
+    auto adsReadData = bucket.getRawBytesRead() + bucket.getStatusReturnSizeInBytes();
     for (size_t i = 0; i < bucket.getNumSubCommands(); i++)
     {
         auto &parameter = bucket.getParameter(i);
