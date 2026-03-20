@@ -38,6 +38,7 @@ struct AdsAddNotificationInfo
 
 struct AdsBulkParameter
 {
+    AdsBulkParameter(const AmsAddr& amsServerAddr);
     AmsAddr amsServerAddr;
     uint32_t iGroup = 0;
     uint32_t iOffset = 0;

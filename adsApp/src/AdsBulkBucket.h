@@ -9,6 +9,7 @@ bool operator==(const AmsNetId &lhs, const AmsNetId &rhs);
 bool operator!=(const AmsNetId &lhs, const AmsNetId &rhs);
 bool operator==(const AmsAddr &lhs, const AmsAddr &rhs);
 bool operator!=(const AmsAddr &lhs, const AmsAddr &rhs);
+void copy(const AmsAddr &from, AmsAddr &to);
 
 class AdsBulkBucket
 {
@@ -29,14 +30,15 @@ public:
     bool amsAddrIsSet() const;
     bool requestTypeIsSet() const;
     uint8_t *getRawBytesRead();
-    uint32_t getNumRawBytesRead() const;
+    size_t getNumRawBytesRead() const;
     uint8_t *getRawBytesWrite();
     uint8_t *getRawBytesWriteValues();
-    uint32_t getNumRawBytesWrite() const;
+    size_t getNumRawBytesWrite() const;
     uint32_t *getRawBytesSubCommandInfo();
     size_t getSubCommandInfoSize() const;
     size_t getSubCommandInfoSizeInBytes() const;
     size_t getNumSubCommands() const;
+    size_t getStatusReturnSizeInBytes() const;
     uint32_t getAdsReturnCodeForSubCommand(size_t subCommandIndex) const;
     bool parameterCanGoInThisBucket(const AdsBulkParameter &parameter, AdsSubCommandRequestType subCommandRequestType) const;
     AdsBulkParameter &getParameter(size_t i);

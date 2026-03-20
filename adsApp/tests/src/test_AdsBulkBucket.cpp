@@ -4,6 +4,10 @@
 
 TEST_SUITE("AdsBulkBucket")
 {
+    auto amsNetId = AmsNetId(1, 2, 3, 4, 5, 6);
+    uint16_t amsServerPort = 30001;
+    AmsAddr amsAddr = {amsNetId, amsServerPort};
+
     TEST_CASE("bool push(const AdsBulkParameter &parameter, AdsSubCommandRequestType subCommandRequestType)\n"
               "AdsBulkRequestType getBulkRequestType() const")
     {
@@ -11,7 +15,7 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is false and bulk request type does not update.")
         {
             AdsBulkBucket bucket(10);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::UNDEFINED);
             CHECK_FALSE(result);
             auto bulkRequestTypeResult0 = bucket.getBulkRequestType();
@@ -21,7 +25,7 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is true and bulk request type updates.")
         {
             AdsBulkBucket bucket(1);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK(result);
             auto bulkRequestTypeResult0 = bucket.getBulkRequestType();
@@ -31,11 +35,11 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is false.")
         {
             AdsBulkBucket bucket(1);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
 
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             result = bucket.push(parameter1, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK_FALSE(result);
         }
@@ -43,11 +47,11 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is false.")
         {
             AdsBulkBucket bucket(2);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
 
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             result = bucket.push(parameter1, AdsSubCommandRequestType::READ_SYMBOL_VALUE);
             CHECK_FALSE(result);
         }
@@ -55,11 +59,11 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is true.")
         {
             AdsBulkBucket bucket(2);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
 
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             result = bucket.push(parameter1, AdsSubCommandRequestType::READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK(result);
         }
@@ -74,7 +78,7 @@ TEST_SUITE("AdsBulkBucket")
                 "Expect return value is true each time and expect referenced get functions return correct values.")
         {
             AdsBulkBucket bucket(3);
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
             auto &parameterResult0 = bucket.getParameter(0);
@@ -88,7 +92,7 @@ TEST_SUITE("AdsBulkBucket")
             auto subCommandInfoSizeInBytesResult0 = bucket.getSubCommandInfoSizeInBytes();
             CHECK(subCommandInfoSizeInBytesResult0 == 16);
 
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             result = bucket.push(parameter1, AdsSubCommandRequestType::READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
             auto &parameterResult1 = bucket.getParameter(1);
@@ -102,7 +106,7 @@ TEST_SUITE("AdsBulkBucket")
             auto subCommandInfoSizeInBytesResult1 = bucket.getSubCommandInfoSizeInBytes();
             CHECK(subCommandInfoSizeInBytesResult1 == 32);
 
-            AdsBulkParameter parameter2;
+            AdsBulkParameter parameter2(amsAddr);
             result = bucket.push(parameter2, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             REQUIRE(result);
             auto &parameterResult2 = bucket.getParameter(2);
@@ -124,21 +128,21 @@ TEST_SUITE("AdsBulkBucket")
             auto numSubCommandsInitial = bucket.getNumSubCommands();
             CHECK(numSubCommandsInitial == 0);
 
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             auto result0 = bucket.push(parameter0, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK_FALSE(result0);
             CHECK(bucket.getNumSubCommands() == 0);
             CHECK_THROWS(bucket.getParameter(0));
             CHECK_THROWS(bucket.getSubCommandRequestType(0));
 
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             auto result1 = bucket.push(parameter1, AdsSubCommandRequestType::READ_INFO_OF_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK_FALSE(result1);
             CHECK(bucket.getNumSubCommands() == 0);
             CHECK_THROWS(bucket.getParameter(1));
             CHECK_THROWS(bucket.getSubCommandRequestType(1));
 
-            AdsBulkParameter parameter2;
+            AdsBulkParameter parameter2(amsAddr);
             auto result2 = bucket.push(parameter2, AdsSubCommandRequestType::GET_DYNAMIC_HANDLE_FOR_INDIVIDUAL_SYMBOL_BY_NAME);
             CHECK_FALSE(result2);
             CHECK(bucket.getNumSubCommands() == 0);
@@ -162,18 +166,21 @@ TEST_SUITE("AdsBulkBucket")
             auto numRawBytesRead = bucket.getNumRawBytesRead();
             CHECK(numRawBytesRead == 0);
 
-            AdsBulkParameter parameter0;
+            AdsBulkParameter parameter0(amsAddr);
             parameter0.value.resize(sizeof(uint32_t));
             auto result = bucket.push(parameter0, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
             REQUIRE(result);
-            AdsBulkParameter parameter1;
+            AdsBulkParameter parameter1(amsAddr);
             parameter1.value.resize(sizeof(uint32_t));
             result = bucket.push(parameter1, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
             REQUIRE(result);
-            AdsBulkParameter parameter2;
+            AdsBulkParameter parameter2(amsAddr);
             parameter2.value.resize(sizeof(uint32_t));
             result = bucket.push(parameter2, AdsSubCommandRequestType::WRITE_SYMBOL_VALUE);
             REQUIRE(result);
+
+            auto statusReturnSizeInBytes = bucket.getStatusReturnSizeInBytes();
+            CHECK(statusReturnSizeInBytes == 12);
 
             auto numRawBytesWrite = bucket.getNumRawBytesWrite();
             CHECK(numRawBytesWrite == 36);

@@ -36,7 +36,8 @@ SOURCES_NEEDED_BUT_NOT_BEING_TESTED = \
 
 SOURCES_UNDER_TEST = \
   AdsBulkBucket.cpp \
-  AdsRequestType.cpp
+  AdsRequestType.cpp \
+  AdsBulkParameter.cpp
 
 # Test sources (basenames only)
 TEST_SOURCES = $(notdir $(wildcard $(TEST_SRC)/*.cpp))

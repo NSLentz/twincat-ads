@@ -24,6 +24,17 @@ bool operator!=(const AmsAddr &lhs, const AmsAddr &rhs)
     return !(lhs == rhs);
 }
 
+void copy(const AmsAddr &from, AmsAddr &to)
+{
+    to.netId.b[0] = from.netId.b[0];
+    to.netId.b[1] = from.netId.b[1];
+    to.netId.b[2] = from.netId.b[2];
+    to.netId.b[3] = from.netId.b[3];
+    to.netId.b[4] = from.netId.b[4];
+    to.netId.b[5] = from.netId.b[5];
+    to.port = from.port;
+}
+
 AdsBulkBucket::AdsBulkBucket(size_t maxNumParametersInBucket)
     : m_bulkRequestType(AdsBulkRequestType::UNDEFINED),
       m_numRawBytesWriteValues(0),
@@ -56,7 +67,7 @@ uint8_t *AdsBulkBucket::getRawBytesRead()
     return m_rawBytesRead.data();
 }
 
-uint32_t AdsBulkBucket::getNumRawBytesRead() const
+size_t AdsBulkBucket::getNumRawBytesRead() const
 {
     return m_rawBytesRead.size();
 }
@@ -71,7 +82,7 @@ uint8_t *AdsBulkBucket::getRawBytesWriteValues()
     return m_rawBytesWrite.data() + getSubCommandInfoSizeInBytes();
 }
 
-uint32_t AdsBulkBucket::getNumRawBytesWrite() const
+size_t AdsBulkBucket::getNumRawBytesWrite() const
 {
     return m_rawBytesWrite.size();
 }
@@ -91,6 +102,11 @@ size_t AdsBulkBucket::getNumSubCommands() const
     return m_parameters.size();
 }
 
+size_t AdsBulkBucket::getStatusReturnSizeInBytes() const
+{
+    return getNumSubCommands() * READ_BYTES_ALLOCATED_FOR_ADS_RETURN_CODE_PER_SUB_COMMAND_OF_REQUEST;
+}
+
 uint32_t AdsBulkBucket::getAdsReturnCodeForSubCommand(size_t subCommandIndex) const
 {
     auto adsReturnCode = (uint32_t *)m_rawBytesRead.data();
@@ -100,7 +116,8 @@ uint32_t AdsBulkBucket::getAdsReturnCodeForSubCommand(size_t subCommandIndex) co
 
 void AdsBulkBucket::makeAmsAddr(const AmsAddr &amsAddr)
 {
-    m_amsServerAddr = std::make_shared<AmsAddr>(amsAddr);
+    m_amsServerAddr = std::make_shared<AmsAddr>();
+    copy(amsAddr, *m_amsServerAddr);
 }
 
 void AdsBulkBucket::makeAmsAddrIfNotSet(const AmsAddr &amsAddr)
